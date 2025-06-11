@@ -1,0 +1,131 @@
+---
+title: "Final Report"
+author: "John Jenkins"
+date: "2024-11-15"
+output: html_document
+---
+
+# **Analysis of Disney Movies**
+
+```{r, echo=FALSE, include=FALSE}
+library(tidyverse)
+titles<-read_csv("titles.csv")
+library(corrplot)
+library(hexbin)
+```
+
+```{r, echo=FALSE, include=FALSE}
+movies<- titles
+
+movies<-movies %>% mutate(id=str_remove(id, "tm")) %>% mutate(production_countries=str_remove_all(production_countries,"'|\\[|\\]")) %>% mutate(genres=str_remove_all(genres,"'|\\[|\\]")) %>% select(-c(description, imdb_id))
+
+movies_to <- movies %>% separate_longer_delim("genres",delim=", ") %>% mutate(genres=na_if(genres,"")) %>% filter(genres!=is.na(genres))
+```
+
+
+```{r, echo=FALSE, include=FALSE}
+titles
+movies
+```
+
+### **Introduction**
+
+Encompassing a wide range of genres and themes, Disney films are considered classics by many fans. Through these films, Disney has become a well-known name within the filmmaking industry and has gathered support in establishing Disney+ within the emerging streaming field. However, identifying the factors that promote viewer reception is crucial for Disney+ to promote its products and enhance its business.
+
+As an established database, the Internet Movie Database (IMDb) provides a valuable resource for consumers to gain information on films and digital products. Similarly, by representing how much a consumer enjoyed a show, IMDb ratings provide businesses with a resource for understanding how well their productions are doing and how popular they are, suggesting a valuable method for determining the reception of Disney+ productions. Likewise, this poses the question of what is the distribution of IMDb ratings for Disney+ productions. To determine the answer to this question, I analyzed the distribution of IMDb ratings for productions on Disney+ in my paper and discovered that they concentrate within the mid-range between 5.0 and 8.0 of the rating scale, indicating room for improved reception.
+
+In comparison, the information on genres that the IMDb provides helps consumers understand what kind of content will be presented. Therefore, when compared to IMDb ratings, genres suggest a means for producers to identify the type of content that consumers enjoy, raising the question of whether a production's genre impacts its IMDb rating. Considering this, I analyzed the relationship between a production's genre and IMDb rating to determine if a production's genre impacts its IMDb rating. However, the analysis resulted in the discovery of an inadequate number of recordings for several genres, preventing significant determinations from being made about the impact of genres and highlighting the necessity of collecting more information.
+
+Additionally, as a core feature of streaming services, the availability of different presentation styles offers viewers a variety of ways to watch productions in a manner that fits their schedule and desires. Furthermore, the different presentation styles suggest that producers could gain valuable information on whether viewers prefer a specific style over another, raising the question of whether TV shows or movies receive higher IMDb ratings. Thus, I used visualizations in my analysis to compare the IMDb ratings of TV shows and movies to determine if viewers preferred a specific style, and it was found that TV shows were better received than movies.
+
+Through these findings, my analysis identifies that Disney+ can improve its business by addressing viewer reception and obtaining more information about its productions. By focusing on producing TV shows, my analysis indicates that Disney+ can enhance its business by presenting its productions more favorably to viewers. Likewise, my findings indicate that there was an insufficient amount of data to determine if genres impact viewer reception. Therefore, I propose that more information should be collected to determine if Disney+ should focus on specific content to enhance its business.
+
+### **Background**
+
+Using the data science competition platform Kaggle, I obtained the titles.csv of the "Disney+ TV Shows and Movies" data set containing information on the movies and TV shows listed on Disney+ streaming as of May 2022. Within this data set, there are 15 variables and 1535 observations. Through these variables and observations, the data set provides each production's general information and basic information on the Internet Movie Database (IMDb) and The Movie Database (TMDB).
+
+Within the data set, three categorical variables identify each Disney production by listing their show titles and website IDs as character stings. Likewise, another two categorical variables identify the type of production by indicating if the observation is a TV show or movie and how many seasons the TV show has. Similarly, the data set contains four categorical variables and two continuous variables that provide the production's general information. Additionally, four continuous variables describe each production's general information on the IMDb and the TMDB. 
+
+After identifying the context of the data set, I removed unnecessary data from the observations and variables to create a data frame that efficiently stores the data. For instance, I removed quotes and brackets from the variables to make them simpler to read. Likewise, I removed the characters from the ID variable to streamline the identification of observations. Similarly, I removed the variables providing a short description of each production and a secondary ID to remove unnecessary information.
+
+In addition to removing unnecessary variables, I tidied the first data frame to make a second data frame that analyzes genre-related data more efficiently. For instance, I separated the list of genres for each production into individual observations so they would be easier to access. Moreover, I mutated the original data frame to change empty genre values into NA values, making identifying the repetitions easier. After adjusting the empty values, I finished tidying the data frame by filtering out the empty genre observations. 
+
+### **Variation Exploration**
+
+By understanding what the distribution of IMDb ratings is, Disney+ producers would gain valuable information that will allow them to assess the success of their current productions. Therefore, to determine the distribution of IMDb ratings for Disney+ productions in 2022, I analyzed the IMDb ratings variable using the histogram, density plot, and box plot below. Through these visualizations, the concentration, peaks, and outliers of the IMDb ratings are highlighted to indicate how the productions on Disney+ streaming compare to the rating scale.
+
+Utilizing the density plot, the concentration of IMDb ratings is illustrated. For example, it is shown that the concentration of IMDb ratings for Disney+ productions increases as the rating proceeds to 6.5 but decreases as the rating proceeds to 10. Moreover, the plot indicates that the distribution of Disney+ IMDb ratings is slightly skewed to the right, suggesting that most of the ratings are within the mid-range of ratings between 5.0 and 8.0. Similarly, by indicating the peaks and low points, the histogram shows that the IMDb ratings between 6.0 and 6.5 are the most commonly recorded ratings for Disney+ productions. Furthermore, the histogram shows that ratings above 9 and below 4.5 have less than 50 occurrences; thus, the plots indicate that consumers tend to rate Disney+ productions between 6.0 and 6.5 on IMDb ratings, while ratings above 9 and below 4.5 may be outliers.
+
+Likewise, the box plot shows the quartile ranges for the distribution of IMDb ratings and highlights outliers in the data. For instance, it can be seen that the first quartile is located at an IMDb rating of 5.9 and the third quartile is located at a rating of 7.3, indicating that 50% of all recorded ratings occur between these values. Similarly, the plot shows that ratings below 3.75 and above 9.5 are outliers. Therefore, the box plot supports the indication that the IMDb ratings of Disney+ productions concentrate within the mid-range between 5.0 and 8.0 of ratings established by the previous plots and clarifies that ratings above 9.5 and below 3.75 are outliers.
+
+Through these plots, Disney+ productions are shown to rate decently on the IMDb rating system. Likewise, the plots show that both low and high ratings are rarely given to Disney+ productions. Thus, it can be concluded that the distribution of IMDb ratings for Disney+ productions is concentrated in the mid-range of possible ratings, with ratings between 6 and 6.5 being the most common.
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies)+geom_density(aes(x=imdb_score))+scale_x_continuous(breaks=seq(0,10,1))+labs(title="Concentration of IMDb Ratings for Productions", x="IMDb Rating", y="Density",caption = "Source: Disney+ TV Shows and Movies",subtitle = "IMDb ratings concentrate in the mid-range between 5.0 and 8.0 of the IMDb rating scale")+theme(plot.caption=element_text(hjust=0),plot.subtitle = element_text(size=10))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies)+geom_histogram(aes(x=imdb_score),bins=50)+scale_x_continuous(breaks=seq(0,10,1))+labs(title="Dinsey+ Tend to Rate Well on the IMDb Rating Scale", x="IMDb Rating", y="Number of Recordings", caption = "Source: Disney+ TV Shows and Movies") + theme(plot.caption=element_text(hjust=-0),plot.subtitle = element_text(size=10))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies)+geom_boxplot(aes(x=imdb_score), outlier.color="red", outlier.shape=1, outlier.size=3)+scale_x_continuous(breaks=seq(0,10,0.5))+labs(title="The Most IMDb Ratings Appear in the Mid-range of the IMDb Rating Scale", x="IMDb Rating", caption = "Source: Disney+ TV Shows and Movies", subtitle="75% of ratings are higher than 5.75 on the IMDb rating scale")+theme(plot.caption=element_text(hjust=0))+scale_y_continuous(breaks=NULL)
+```
+
+### **Covariation Exploration**
+
+If the genre of a production impacts its IMDb rating, understanding this relationship would provide Disney+ producers with valuable information regarding what content they should focus on in their future productions. Therefore, to determine if a production's genre impacts its IMDb rating, I examined the covariation between the genres and IMDb rating variables using the bar graph, box plot, and violin plot below. By utilizing these visualizations, the averages, distributions, and outliers of the IMDb ratings for each genre are highlighted to compare how a genre impacts a production's popularity.
+
+Through the bar graph, the average IMDb rating of each genre is shown. By examining this visualization, the average IMDb rating for each genre is indicated to range between 6.15 and 7.15, suggesting that there may be minimal variability between the averages. Likewise, it is indicated that the reality genre has the highest average IMDb rating, while the war genre has the lowest average IMDb rating. However, the data has an insignificant amount of recorded ratings for war genres to determine a meaningful difference. Thus, the bar graph suggests that the reality genre may be the most popular, the war genre may be the least popular, and that there may be an insignificant variation between the averages.
+
+Moreover, the box plot illustrates the variation between the medians of each genre and the location of outliers. For example, the box plot suggests that the medians of each genre tend to be insignificantly different, supporting the indication made by the bar graph. Furthermore, the visualization indicates that IMDb ratings above 9.25 and below 4.75 begin to be identified as outliers for the genres. Similarly, by illustrating the distribution of IMDb ratings for each genre, the violin plot indicates that the IMDb ratings tend to be between 5.5 and 8.0 and that the genres tend to have a wide range of variability. Therefore, the visualizations suggest that a production's genre may have an insignificant impact on its IMDb rating.
+
+After examining these visualizations, the IMDb ratings of each genre are shown to exhibit a wide range of variability. Likewise, the plots indicate that the differences between the IMDb ratings of each genre are insignificant. Thus, it can be concluded that a production's genre has an insignificant impact on its IMDb rating.
+
+```{r, echo=FALSE}
+moviegene <- movies_to %>% group_by(genres) %>% summarize(average_pop=mean(imdb_score, na.rm=TRUE))
+
+ggplot(moviegene)+geom_bar(aes(x=average_pop,y=fct_reorder(genres,average_pop)), stat="identity")+labs(title="Average IMDb Ratings of Productions as of 2022", x=NULL, y="Genre", caption = "Source: Disney+ TV Shows and Movies", subtitle = "The Reality genre has the highest average IMDb rating while the War genre has the lowest") +theme(plot.caption=element_text(hjust=-0), plot.subtitle = element_text(size=10))+geom_text(aes(x=average_pop+0.05,y=genres,label=round(average_pop,2)),stat="identity")+coord_cartesian(xlim=c(6,7.2))
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+ggplot(movies_to)+geom_boxplot(aes(y=fct_reorder(genres,imdb_score),x=imdb_score), outlier.color="red", outlier.shape=1, outlier.size=3, notch=TRUE)+labs(title="Median IMDb Ratings of Productions Tend to be Similar", x=NULL, y="Genre", caption = "Source: Disney+ TV Shows and Movies")+theme(plot.caption=element_text(hjust=-0))+scale_x_continuous(breaks=seq(0,10,0.5))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies_to)+geom_violin(aes(y=fct_reorder(genres,imdb_score),x=imdb_score))+labs(title="Concentration of IMDb Ratings for Productions Tend to be Similar", x=NULL, y="Genre", caption = "Source: Disney+ TV Shows and Movies")+theme(plot.caption=element_text(hjust=-0))+scale_x_continuous(breaks=seq(0,10,0.5))
+```
+
+### **Inspiration Exploration**
+
+By understanding if TV shows or movies receive higher IMDb ratings, Disney+ producers would gain valuable information that would allow them to determine the most effective medium for presenting their productions to consumers. Thus, I created the bar graph, box plot, and density plot below to determine the relationship between IMDb ratings and presentation style. Using these visualizations, the averages, outliers, and concentrations of IMDb ratings for each presentation style are highlighted to identify how the presentation style impacts a production's IMDb rating.
+
+Through the bar graph, the average ratings for each presentation style are highlighted. For instance, TV shows are shown to have a higher average IMDb rating of 6.94 than the 6.44 average for movies, suggesting that TV shows may be the more enjoyable medium for viewers. However, the 0.5 difference between the averages suggests that there may be an insignificant variation between the IMDb ratings of TV shows and movies. Hence, the visualization suggests that TV shows may be the more effective medium for presenting productions in a style enjoyable to viewers.
+
+In comparison, the box plot highlights the variation between the IMDb ratings of the presentation styles and the locations of outliers. For example, the plot indicates that the median IMDb ratings for the presentation styles are significantly different, disproving the suggestion made by the bar graph that the difference may be insignificant. Additionally, the visualization indicates that 50% of IMDb ratings for TV shows appear between 6.25 and 7.75, while 50% of ratings appear between 5.75 and 7.5, further suggesting that TV shows tend to receive higher ratings. Moreover, the plot illustrates that outliers appear at ratings below 4.0 for TV shows and below 3.75 for movies, suggesting that low ratings are rarer for TV shows. Similarly, by highlighting the concentration of IMDb ratings for each presentation type, the density plot identifies that the concentration of IMDb ratings for TV shows is bimodal between 6.5 and 7.75 ratings, while the concentration for movies is unimodal at 6.5 to 7.0, indicating that TV shows tend to receive high ratings more consistently. Henceforth, the visualizations confirm that TV shows tend to receive higher ratings than movies.
+
+Utilizing these visualizations, TV shows are indicated to produce a higher average of ratings than movies. Furthermore, the visualizations highlight that TV shows tend to receive high ratings more often and low ratings less frequently than movies, suggesting that they are more enjoyable to viewers. Therefore, it can be concluded that TV shows receive higher ratings than movies and are better received by viewers.
+
+```{r, echo=FALSE}
+movietype <- movies %>% group_by(type) %>% summarize(average_score=mean(imdb_score, na.rm=TRUE))
+
+ggplot(movietype)+geom_bar(aes(x=average_score,y=fct_reorder(type,average_score)), stat="identity")+labs(title="Average IMDb Ratings for Movies and TV Shows as of 2022", x=NULL, y="Show Type", caption = "Source: Disney+ TV Shows and Movies", subtitle="TV shows have a higher average IMDb rating than movies")+theme(plot.caption=element_text(hjust=-0),plot.subtitle = element_text(size=10))+scale_x_continuous(breaks=seq(0,7.5,0.5))+geom_text(aes(x=average_score+0.25,y=type,label=round(average_score,2)),stat="identity")
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies)+geom_boxplot(aes(y=fct_reorder(type,imdb_score),x=imdb_score), outlier.color="red", outlier.shape=1, outlier.size=3, notch=TRUE)+labs(title="Median IMDb Ratings of TV shows are higher than Movies as of 2022", x=NULL, y="Show Type", caption = "Source: Disney+ TV Shows and Movies")+theme(plot.caption=element_text(hjust=-0), plot.subtitle = element_text(size=10))+scale_x_continuous(breaks=seq(0,10,0.5))
+```
+
+```{r, echo=FALSE, warning=FALSE}
+ggplot(movies)+geom_density(aes(x=imdb_score, color=fct_reorder(type,imdb_score)))+labs(title="Concentration of IMDb Ratings for Movies and TV Shows as of 2022", x=NULL, y="Density", caption = "Source: Disney+ TV Shows and Movies",color="Show Type", subtitle = "TV shows concentrate in a wider range of high IMDb ratings than movies")+theme(plot.caption=element_text(hjust=-0), legend.position = "bottom", plot.subtitle = element_text(size=10))+scale_x_continuous(breaks=seq(0,10,0.5))
+```
+
+### **Conclusion**
+
+Upon analyzing the data set, it was determined that the distribution of ratings for Disney+ productions is concentrated slightly above the mid-range between 5.0 and 8.0 of the IMDb rating scale. Based on this finding, producers can be informed to take steps toward improving their productions to make them more enjoyable to viewers and improve their marketing. Additionally, TV shows were shown to receive significantly higher ratings than movies, suggesting that producers should present their productions through TV shows to improve their reception by viewers.
+
+Furthermore, a production's genre was found to have an insignificant impact on its IMDb rating. However, the plot below shows that the data set contains an inadequate number of observations for several genres, indicating that significant conclusions regarding their impact can't be made with the current data and that more data should be collected for further analysis. Therefore, this analysis indicates that Disney+ producers can improve viewer reception by presenting their productions through TV shows, and future analyses should gather more data to determine the impact of a production's genre.
+
+```{r, echo=FALSE}
+movies_to %>% group_by(genres) %>% summarize(number=n())%>%ggplot()+geom_bar(aes(y=fct_reorder(genres,number),x=number), stat="identity")+labs(title="Unbalance of Genre Recorgings", y="Genres", x="Number of Recordings", subtitle = "War genres have less than 100 observaions while family genres have more than 700")+theme(plot.subtitle = element_text(size=10))+scale_x_continuous(breaks=seq(0,800,100))
+```
