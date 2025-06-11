@@ -1,0 +1,72 @@
+---
+title: "Markdown Assignment 16"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r, echo=FALSE, include=FALSE}
+library(tidyverse)
+ccenters<-read_csv("countryCenters.csv")
+lifexp<-read_csv("LifeExpectancies.csv")
+library(maps)
+library(usdata)
+library(usmap)
+```
+
+### **Question 1**
+```{r}
+world1<-map_data("world")
+
+southamerica<-subset(world1, region %in% c("Brazil","Colombia","Argentina","Peru","Venezuela","Chile","Ecuador","Bolivia","Paraguay","Uruguay","Guyana","Suriname","French Guiana","Falkland Islands"))
+
+braz<-filter(southamerica, region=="Brazil")
+
+ggplot()+geom_polygon(data=southamerica, aes(x=long,y=lat,group=group), fill="white",color="black")+geom_polygon(data=braz, aes(x=long,y=lat,group=group), fill="green",color="black")+theme_void()+coord_fixed(1.3)+labs(title="Brazil")
+```
+
+***
+### **Question 2**
+```{r}
+plot_usmap(data=county_2019,region="counties", values="housing_two_unit_structures",include="MO")+theme_void()+labs(title="Percentage of Missouri residents housed in multi-unit structures", fill="Percentage")+theme(plot.title=element_text(size=10), legend.title=element_text(size=10), legend.position=("left"))
+
+```
+
+***
+### **Question 3**
+```{r}
+cities<-tibble(names=c("Seattle","Houston","Orlando","Boston","Liberty","New York City"), lat=c(47.608013,29.749907,28.538336,42.361145,39.246096, 40.730610), long=c(-122.335167,-95.358421,-81.379234,-71.057083, -94.418469, -73.935242))
+
+theusa<-map_data("usa")
+
+ggplot()+geom_polygon(data=theusa, aes(x=long,y=lat,group=group), fill="white",color="black")+geom_path(data=cities, aes(x=long, y=lat), color="purple")+geom_point(data=cities, aes(x=long,y=lat), color="red")+geom_label(data=cities, aes(x=long, y=lat, label=names), nudge_y=-1.5, nudge_x=1.5)+labs(title="Flying Cards Band Tour - Fall 2026", x="Longitude", y="Latitude")
+```
+
+***
+### **Question 4**
+```{r}
+lifexp <- lifexp %>% mutate(region=str_replace(region, "Russian Federation","Russia")) %>% mutate(region=str_replace(region, "Congo, Dem. Rep.","Democratic Republic of the Congo")) %>% mutate(region=str_replace(region, "Congo, Rep.","Republic of Congo"))%>% mutate(region=str_replace(region, "Iran, Islamic Rep.","Iran")) %>% mutate(region=str_replace(region, "Congo, Rep.","Republic of Congo"))%>% mutate(region=str_replace(region, "Egypt, Arab Rep.","Egypt"))  	
+
+## I adjusted the region names 4 times (4 regions)
+
+
+ccenters <- ccenters %>% mutate(region=str_replace(region, "Congo [DCR]","Democratic Republic of the Congo")) %>% mutate(region=str_replace(region, "Congo [Republic]","Republic of Congo"))
+
+world<-map_data("world") %>% mutate(region=str_replace(region, "USA","United States")) %>% full_join(ccenters, join_by(region)) %>% full_join(lifexp, join_by(region)) 
+
+contryLE <- world %>% pivot_longer(cols=-(long:IncomeGroup), names_to="Year", values_to="LifeExpectancy")
+```
+
+```{r}
+ggplot()+geom_polygon(data=contryLE, aes(x=long,y=lat,group=group, fill=IncomeGroup),color="black")+theme_void()+coord_fixed(1.5)
+```
+
+***
+### **Question 5**
+```{r}
+contryLE <- contryLE %>% filter(Year==1980)
+
+ggplot()+geom_polygon(data=contryLE, aes(x=long,y=lat,group=group), fill="white",color="black")+theme_void()+coord_fixed(1.3)+geom_point(data=contryLE, aes(x=longitude, y=latitude, size=LifeExpectancy))
+
+```
+

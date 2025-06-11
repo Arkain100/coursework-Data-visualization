@@ -1,0 +1,66 @@
+---
+title: "**Data Visualization Markdown Assignment 5**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+
+### **Question 1**
+```{r, echo=FALSE, include=FALSE}
+billboardData<-read_csv("billboard-hits.csv")
+```
+```{r}
+billboardData
+```
+
+> The first three columns imported as we would have wanted but the last two, peak_date and peak_rank, did not because peak_date was imported as a chr (character string) instead of a date since the values were stored in a date format R did not recognize and peak_rank was imported as a chr instead of a some form of number like int or dbl since the first value was recorded as "Yesterday."
+
+***
+### **Question 2**
+```{r}
+billboardData<-read_csv("billboard-hits.csv", skip=1)
+billboardData
+```
+
+> After using the skip function the problem with the peak_rank column was solved since it removed the "Yesterday" value from the consideration, but the problem with the peak_date column was unresolved because all the dates were saved in a date format that R does not recognize and all the column names were switched to the names of what were the previous first set of values.
+
+***
+### **Question 3**
+```{r}
+headers<-as.character(read_csv("billboard-hits.csv", n_max=1, col_name=FALSE))
+billboardData<-billboardData %>% set_names(headers)
+billboardData
+
+```
+
+***
+### **Question 4**
+```{r}
+bandData<-filter(billboardData,!is.na(band)) %>% group_by(band) %>% summarize(count = n(), avg_peak_rank=mean(peak_rank, na.rm=TRUE))
+ggplot(bandData)+geom_point(aes(y=count, x=avg_peak_rank))+labs(x="Average Peak Rank", y="Number of Top 100 Hits")
+```
+
+> The plot illustrates that their is no clear relationship between a band's number of hits and a higher average peak rank because the data does not illustrate an increase in the number of hits with an increase in average peak rank and it shows that all the data points are mostly uniform below 20 hits. 
+
+***
+### **Question 5**
+```{r}
+star_wars_characters<-tribble(
+    ~name, ~lightsaber_color, ~hieght, ~Gender,
+    "Plo Koon", "Blue", 1.88, "Male",
+    "Anakin Skywalker", "Blue", 1.82, "Male",
+    "Ahsoka Tano", "Green", 1.61, "Female",
+    "Yoda", "Green", 1.21, "Male",
+    "Mace Windu", "Purple", 1.83, "Male")
+write_csv(star_wars_characters,"star_wars_character.csv")
+```
+
+> The data represents Star Wars characters, their height, lightsaber colors, and gender.
+
+
+

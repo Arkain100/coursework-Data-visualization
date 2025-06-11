@@ -1,0 +1,69 @@
+---
+title: "Markdown Assignment 17"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(leaflet)
+library(dygraphs)
+library(xts)
+library(DT)
+library(scatterplot3d)
+library(threejs)
+groundhogs<-read_csv("groundhogs.csv")
+library(nycflights13)
+
+```
+
+### **Question 1**
+```{r}
+cities<-tibble(names=c("Seattle","Houston","Orlando","Boston","Liberty","New York City"), lat=c(47.608013,29.749907,28.538336,42.361145,39.246096, 40.730610), long=c(-122.335167,-95.358421,-81.379234,-71.057083, -94.418469, -73.935242))
+cities<- cities %>% mutate(stopnumber=str_c("Stop #",row_number(),": ",names))
+
+
+leaflet(cities) %>% addTiles() %>% addMarkers(~long,~lat, label=~names, popup=~stopnumber)
+```
+
+***
+### **Question 2**
+```{r}
+groundhogpic<-makeIcon("groundhogpic.png","groundhogpic.png",40,40)
+
+groundhogs
+
+leaflet(groundhogs) %>% addTiles() %>% addMarkers(~longitude,~latitude, label=~name, icon=groundhogpic, clusterOptions=markerClusterOptions())
+```
+
+> A fun name of one of the ground hogs is Octoraro Orphie.
+
+***
+### **Question 3**
+```{r}
+newground<-groundhogs %>% select(-(description))
+datatable(newground,editable=list(target="row",disable=list(columns=3:4)))
+```
+
+***
+### **Question 4**
+```{r}
+newfl<-flights %>% group_by(time_hour) %>% summarize(averagedist=mean(distance,na.rm=TRUE))
+
+flightsTimeSeries <- xts(x=newfl$averagedist,order.by=newfl$time_hour)
+
+dygraph(flightsTimeSeries) %>% dySeries("V1",label="Average Distance")
+```
+
+> One oddity I notice in the plot is that around July the higher average distace traveled is more condensed. One pattern I notice is a high concentration of average flights being between 800 and 1200 miles.
+
+***
+### **Question 5**
+```{r}
+newdiamond<-diamonds %>% filter(z<8)
+
+scatterplot3js(newdiamond$x,newdiamond$y,newdiamond$z, color=as.numeric(newdiamond$cut),size=0.35)
+```
+
+> It can be concluded that neither of the x, y, or z variables have a relationship to the cut variable.

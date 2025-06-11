@@ -1,0 +1,61 @@
+---
+title: "Markdown Assignment 20"
+author: "John Jenkins"
+date: "2024-11-14"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+movies<-readRDS("movies.rds")
+library(gganimate)
+library(gifski)
+library(repurrrsive)
+library(leaflet)
+library(dygraphs)
+```
+
+### Question 1
+```{r}
+movies2 <- movies %>% unnest_wider(genres) %>% unnest_longer(id_genre, keep_empty = TRUE) %>% mutate(id_genre=str_remove(id_genre,"[0123456789]+: "))
+
+movies2
+```
+> The nested variable was genres in the original data set.
+
+
+***
+### Question 2
+```{r}
+genmovies<-movies2 %>% filter(id_genre=="Adventure" | id_genre=="Comedy" | id_genre=="Drama" | id_genre=="Fantasy" | id_genre=="Horror" | id_genre=="Romance" | id_genre=="Western") %>% drop_na() %>% filter(release_date>=ymd("2000-01-01"))
+
+ggplot(genmovies)+geom_line(aes(x=release_date,y=runtime, color=id_genre))+labs(title="Drama Movies are Being Created with Lower Runtimes Even Though the Average Movie Runtime Remains the Same", subtitle="A line graph showing that the range of runtimes for Drama movies has decreased between 2000 and after 2015 and that the average movie runtime is around 100 minutes.")
+```
+
+***
+### Question 3
+```{r}
+budmovie<-movies2 %>% drop_na() %>% filter(id_genre=="Animation") %>% mutate(year=year(release_date)) %>% group_by(year) %>% summarize(average_budget=mean(budget, na.rm=TRUE))
+
+budgplot<-ggplot(budmovie)+geom_line(aes(x=year, y=average_budget))
+
+budgplot+transition_reveal(year)
+
+```
+
+***
+### Question 4
+```{r}
+gmaped<-gmaps_cities %>% unnest_wider(json) %>% unnest_longer(results) %>% unnest_wider(results) %>% unnest_wider(types, names_sep="_")%>% unnest_wider(address_components, names_sep="_")%>% unnest_wider(address_components_1, names_sep="_")%>% unnest_wider(address_components_2, names_sep="_")%>% unnest_wider(address_components_3, names_sep="_")%>% unnest_wider(address_components_4, names_sep="_")%>% unnest_wider(geometry)%>%unnest_wider(viewport, names_sep="_")%>%unnest_wider(viewport_northeast, names_sep="_")%>%unnest_wider(viewport_southwest, names_sep="_")%>%unnest_wider(address_components_1_types, names_sep="_")%>%unnest_wider(address_components_2_types, names_sep="_")%>%unnest_wider(address_components_3_types, names_sep="_")%>%unnest_wider(address_components_4_types, names_sep="_")%>%unnest_wider(bounds, names_sep="_")%>%unnest_wider(location, names_sep="_")%>%unnest_wider(bounds_northeast, names_sep="_")%>%unnest_wider(bounds_southwest, names_sep="_")
+gmaped
+```
+
+***
+### Question 5
+```{r}
+gmaped_updated<-gmaped %>% mutate(formatted_address=str_replace(formatted_address, "Washington, USA","Washington, OR, USA"))
+
+#Added OR to the formatted address so that Washington is shown as Washington Oregon
+
+leaflet(gmaped_updated) %>% addTiles() %>% addMarkers(~location_lng,~location_lat, label=~formatted_address)
+```

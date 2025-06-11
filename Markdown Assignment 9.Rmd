@@ -1,0 +1,92 @@
+---
+title: "**Markdown Assignment 9 - Exploratory Data Analysis**"
+author: "**John Jenkins**"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(stats19)
+library(ggridges)
+library(palmerpenguins)
+library(corrplot)
+library(patchwork)
+vehicles<-get_stats19(year=2022, type="vehicle", ask=FALSE)
+```
+
+### **Question 1**
+```{r}
+vehicles <- vehicles %>% drop_na(age_of_driver)
+ggplot(vehicles)+geom_density(aes(x=age_of_driver), bins=5)+labs(x="Driver Age", y="Number of Recorded Individuals", title="30 Year-Old Drivers Have the Highest Number of Reported Accidents ", subtitle="Age of Drivers and the Number of Reported Accidents.", caption="Source: stats19")+theme(plot.caption = element_text(hjust=0.0),plot.subtitle=element_text(size=10),plot.title=element_text(face="bold", size=12))+scale_x_continuous(breaks=seq(0,100,10))
+
+ggplot(vehicles)+geom_boxplot(aes(x=age_of_driver), notch=TRUE)+labs(x="Driver Age", y="", title="The Median Age of Drivers in Reported Vehicle Accidents is Between 35 and 40 Years-Old ", subtitle="Age of Drivers and the Average Age of Their Vehicle.", caption="Source: stats19")+theme(plot.caption = element_text(hjust=0.0),plot.subtitle=element_text(size=10),plot.title=element_text(face="bold", size=12))+scale_x_continuous(breaks=seq(0,100,10))+scale_y_continuous(label=NULL)
+```
+
+> Plot 1: The plot shows that the highest number of reported vehicle accidents is for 30 year olds. Likewise, the plot shows that the data climbs steeply around the age of 15 for a driver until it levels off at 20 before increasing again between 25 and 30. Moreover, the plot shows that after a driver reaches 30 the number of reported vehicle accidents continues to decline.
+
+>Plot 2: The plot shows that 50% of all recorded vehicle acidents for 2022 was for individuals between the age of about 28 and about 53. Likewise, the plot shows that the median age for recorded vehicle accidents is about 38. Moreover, the plot shows that accidents at and above the driver age of 90 are outliers when compared to the reported accidents for the younger ages.
+
+***
+### **Question 2**
+```{r}
+vehicles1<- vehicles %>% drop_na(propulsion_code) %>% group_by(propulsion_code) %>% summarize(count1=n())
+
+ggplot(vehicles1)+geom_point(aes(y=fct_reorder(propulsion_code, count1),x=count1), stat="identity")+labs(x="Number of Reports", y="Type of Fuel", title="Propulsion Code Petrol Vehicles Have the Highest Number of Recorded Accidents", subtitle="Vehicle's Type of Fuel and Their Number of Reported Accidents.", caption="Source: stats19")+theme(plot.caption = element_text(hjust=0.0),plot.subtitle=element_text(size=10),plot.title=element_text(face="bold", size=12))
+
+vehicles3 <- vehicles %>% mutate(propulsion_code=propulsion_code %>% fct_infreq())
+
+ggplot(vehicles3)+geom_bar(aes(y=propulsion_code,after_stat(count)/sum(after_stat(count))))+labs(x="Percentage of Reports", y="Type of Fuel", title="Propulsion Code Petrol Vehicles Have the Highest Percentage of Recorded Accidents", subtitle="Vehicle's Type of Fuel and Their Percentage of Reported Accidents.", caption="Source: stats19")+theme(plot.caption = element_text(hjust=0.0),plot.subtitle=element_text(size=10),plot.title=element_text(face="bold", size=12))
+```
+
+> Plot 1: The plot shows that the category with the most entries is the petrol category and that new fuel technology has the lowest number of entries in the data set. Likewise, the plot shows that undefined, heavy oil, and petrol have over double the other categories for the propulsion_code variable.
+
+> Plot 2: The plot shows that the category with the highest percentage of reports is petrol with slightly over 40%. Likewise, the plot shows that all but the top 3 categores each make up less than 10% of the reports and that the top 3 categories each have over 3 times as much report percentage than the other categories.
+
+
+***
+### **Question 3**
+```{r}
+
+penguins_new<-penguins %>% select(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, year) %>% drop_na(bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, year)
+corrplot(cor(penguins_new), method="ellipse", type="upper")
+
+ggplot(penguins_new)+geom_point(aes(x=flipper_length_mm, y=body_mass_g))+geom_smooth(aes(y=body_mass_g, x=flipper_length_mm))
+
+```
+
+
+> The variables that have the most correlation are Flipper Length (mm) and Body Mass (g) and they have a positive correlation.
+
+***
+### **Question 4**
+```{r}
+erupt<-ggplot(faithful)+geom_histogram(aes(x=eruptions), bins=100)
+
+wait<-ggplot(faithful)+geom_histogram(aes(x=waiting), bins=100)
+
+(erupt+wait)
+
+```
+
+```{r}
+ggplot(faithful)+geom_point(aes(x=waiting, y=eruptions))
+```
+
+```{r}
+new_faithful<- faithful %>% mutate(erupt_wait=case_when((eruptions<=3 & waiting<=70) ~ "short", (eruptions>=3.5 & waiting>=67) ~ "long"))
+
+ggplot(new_faithful)+geom_point(aes(x=waiting, y=eruptions, color=erupt_wait))+geom_smooth(aes(y=eruptions, x=waiting, fill=erupt_wait), method=lm)
+```
+
+```{r}
+new_faithful1<-new_faithful %>% drop_na(erupt_wait)
+
+ggplot(new_faithful1)+geom_point(aes(x=waiting, y=eruptions, color=erupt_wait))+geom_smooth(aes(y=eruptions, x=waiting, fill=erupt_wait), method="lm")
+```
+
+> When not considering subgroups, I see a large a large positive correlaiton between waiting and the number of eruptions (largely based on the scatter plots, with a suggestion that their might be a hiden trend in the data based on the histograms). 
+
+>When considering the subgroups, I see a small positive correlation between waiting and eruptions within each of the subgroups, where as waiting gets closer to 70 the eruptions tend to  climp above 2 while when waiting clims to past 90 starting around 70 the eruptions tend to climb to above 4.5. 
+
+>The exclusion of the middle points changed the trend that I saw (based on the last two plots) by indicating that the middle drasticly increased the percieved correlation of increase in plot 2 through pre-attentive processing. 

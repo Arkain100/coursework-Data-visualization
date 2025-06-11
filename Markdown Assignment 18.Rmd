@@ -1,0 +1,49 @@
+---
+title: "Markdown Assignment 18"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(av)
+library(gapminder)
+library(datasauRus)
+```
+
+### **Question 1**
+```{r}
+ggplot(gss_cat)+geom_histogram(aes(x=age), bins=100)+transition_time(year)+labs(title="Age of respondents in year: {frame_time}", subtitle = "A histogram showing the number of respondents to the gss_cat survey in each age group in year: {frame_time}.")+theme(plot.subtitle = element_text(size=10))
+```
+
+***
+### **Question 2**
+```{r}
+ggplot(gapminder)+geom_point(aes(x=gdpPercap, y=lifeExp, size=pop),alpha=0.4)+facet_wrap(~continent,nrow=2)+transition_time(year)+scale_x_log10()+scale_size(range=c(3,14))+labs(title="Life Expectancy by Continent in {frame_time}")+theme(legend.position="none")
+```
+
+***
+### **Question 3**
+```{r}
+newgap <- gapminder %>% filter(country=="Canada"|country=="United States"|country=="New Zealand"|country=="Australia")
+
+ggplot(newgap)+geom_point(aes(x=year, y=lifeExp, color=country))
+
+newgap2 <- newgap %>% group_by(year) %>% mutate(Rank=rank(-lifeExp))
+
+ggplot(newgap2)+geom_bar(aes(y=lifeExp, x=Rank, group=country, fill=country), stat="identity")+transition_time(year)+geom_text(aes(x=Rank,y=5,label=country), stat="identity")+geom_text(aes(x=Rank,y=lifeExp+50,label=format(round(lifeExp,2))), stat="identity")
+```
+
+> One reason the static plot is better than the animated plot is that it allows the reader to compare each countries life expectancy to each other without having to pause the plot, while the animated plot is better for comparing the life expectacies as they change throughout the years rather than pausing and comparing them.
+
+***
+### **Question 4**
+```{r}
+dino<-ggplot(datasaurus_dozen)+geom_point(aes(x=x,y=y))+transition_states(dataset)+ease_aes("cubic-in-out")
+
+animate(dino, renderer=av_renderer())
+```
+

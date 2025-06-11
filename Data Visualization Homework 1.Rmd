@@ -1,0 +1,49 @@
+---
+title: "**Data Visualization Markdown Assignment 1**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+### **Question 1** 
+```{r, include=FALSE}
+library(tidyverse)
+```
+***
+### **Question 2**
+```{r,echo=FALSE}
+5*sin(pi/3)+72
+```
+***
+### **Question 3**
+```{r,echo=TRUE}
+h<-'family'
+cat("Ohana means",h,"and",h,"means nobody gets left behind or forgotten.")
+```
+***
+### **Question 4**
+```{r}
+vec1<-c(1, 5, 9, -3, 4, 0)
+vec1[3]
+mat<-matrix(vec1,nrow=3,ncol=2,byrow=TRUE)
+#matrix added to itself
+mat+mat
+```
+***
+### **Question 5**
+* 3minutes  
+  + It is not allowed because a name cannot start with a number.  
+* minutes3  
+  + This is allowed because a name does not start with a number or underscore and the first letter isn't followed by a number or underscore.  
+* var_name  
+  + This is allowed because the name starts with a letter and is not immediately followed by a number or underscore.  
+* seq  
+  + This is not allowed because it is the name of a command.
+
+***
+### **Question 6**
+```{r}
+sciFi <- ifelse((7+4==12)|(5-4==1), "Star Wars","Star Trek")
+sciFi
+```
+>In this code the ifelse() function is testing the equations (7+4==12) and (5-4==1) to see if either one is correct and then returns "Star Wars" since (5-4==1) is true and not "Star Trek", which would need both equations to return false for the ifelse() statement to return "Star Trek". Without the context of the equations and results, the ifelse() function is testing the condition for TRUE or FALSE and then returns the first result if the condition is TRUE and the second result if the condition is FALSE.

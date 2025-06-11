@@ -1,0 +1,68 @@
+---
+title: "Markdown Assignment 13"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(babynames)
+library(patchwork)
+princess<-read_csv("princess.csv")
+```
+
+### **Question 1**
+```{r}
+str_view(fruit, "an*a")
+```
+```{r}
+str_view(fruit, "(an)*a")
+```
+```{r}
+str_view(fruit, "(an)?a")
+
+```
+
+>The differences between the regular expressions being evaluated are the first regular expression, "an*a", searching for any occurances in which a fruit's name contains a substring of letters that starts with an "a" and possibly contains an "n" that can be repeated any number of times between the first "a" and another "a" (which only applies to words that have "ana" in their name because there are no names with "aa"), the second regular expression searching for names that contain an "a" and names that possibly contain an "an" repeated any number of times before the "a", and the third regular expression is searching for names similar to the second regular expression but without any repeat in "an" in the name. 
+
+***
+### **Question 2**
+```{r}
+newbabynames <- babynames %>% group_by(name) %>% summarize(count=sum(n)) %>% mutate(name_length=str_length(name), constants=str_count(str_to_lower(name),"[^aeiou]"), vowels=str_count(str_to_lower(name),"[aeiou]")) 
+
+newbabynames
+```
+
+***
+### **Question 3**
+```{r}
+vowelplot <- ggplot(newbabynames)+geom_histogram(aes(x=vowels), bins=9, color="black", fill="blue")+scale_x_continuous(breaks=seq(0,8,1))
+
+constantplot <- ggplot(newbabynames)+geom_histogram(aes(x=constants),bins=12, breaks=seq(0,11,1), color="black", fill="red")+scale_x_continuous(breaks=seq(0,11,1))
+
+vowelplot+constantplot
+```
+
+***
+### **Question 4**
+```{r}
+tidiestprincess <- princess %>% separate_wider_regex(pps, patterns=c(Princess="[^\\-]+","-", Prince="[^\\-]*","-?",sidekick1="[^\\^]*", "\\^?",sidekick2="[^\\^]*", "\\^?",sidekick3="[^\\^]*"), too_few="align_start")
+tidiestprincess
+```
+
+> I think it's computationally better to work with regular expression functions because they allow you to complete the same amount of work/separation as other functions but with fewer lines of code. 
+
+***
+### **Question 5**
+```{r}
+new_words<-str_replace(words, "([^e])ed$", "\\1ing")
+new_words
+```
+
+```{r}
+### Quick Check
+str_view(new_words,"ing")
+```
+

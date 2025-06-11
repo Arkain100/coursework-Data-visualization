@@ -1,0 +1,29 @@
+---
+title: "R Markdown Assignment 7"
+author: "John Jenkins"
+date: "2024-09-17"
+output: html_document
+---
+
+```{r, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+### ***Question 1***
+```{r}
+av.age.yr<-group_by(gss_cat, year) %>% summarize(av.age = mean(age, na.rm=TRUE))
+
+ggplot(av.age.yr)+geom_smooth(aes(x=year, y=av.age))+scale_x_continuous(breaks=seq(2000,2014,2))+theme_linedraw()+labs(x="Year", y="Average Surveyor Age", title="Surveys Show Older Individuals are Participating More in General Social Surveys", subtitle="Average age of survey participants who participated in the General Social Surveys.", caption="Source: gss_cat")+theme(plot.caption = element_text(hjust=0.0),plot.subtitle=element_text(size=10),plot.title=element_text(face="bold", size=12))
+```
+
+> An observation that can be made from the plot is that the average age of repsondents to the survey has been increasing since between 2002 and 2014 and that the there was a slight decrease in respondents between 2000 and 2002.
+
+***
+### ***Question 2***
+```{r}
+avg.peng<-group_by(penguins, year, species, sex) %>% summarize(av.bill=mean(bill_length_mm,na.rm=TRUE), av.mass=mean(body_mass_g,na.rm=TRUE))
+
+ggplot(avg.peng)+geom_point(aes(x=av.mass, y=av.bill, color=species, shape=sex))+theme(legend.position="top")+geom_label(aes(x=4750,y=42), label="Penguins grouped by sex, species, and year", fill="purple", color="white")+labs(x="Average Body Mass (g)", y="Average Bill Length (mm)", color="Species", shape="Gender:")
+```
+

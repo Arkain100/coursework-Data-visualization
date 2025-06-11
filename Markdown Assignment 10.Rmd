@@ -1,0 +1,66 @@
+---
+title: "**Markdown Assignment 10**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(downloader)
+cars2<-read_csv("cars.csv")
+candy<-read_csv("candy.csv")
+```
+
+### **Question 1**
+```{r}
+popgrow <- tibble(year=c(2015,2015,2015,2015,2016,2016,2016,2016,2016,2017,2017,2017), state=c("MO","KS","MO","KS","MO","KS","NE","MO","KS","MO","NE", "KS"), measurement=c("pop","pop","growth","growth","pop","pop","pop", "growth","growth", "pop","pop","growth"), value=c(6075,2910,0.27,0.31,6091,2912,1906,0.26,0.08,6111,1916,-0.07))
+
+```
+```{r}
+popgrow1<-popgrow %>% pivot_wider(names_from=measurement, values_from=value)
+
+popgrow1
+
+ggplot(popgrow1)+geom_bar(aes(x=year, y=pop, fill=state), stat="identity", position="dodge")
+```
+
+
+***
+### **Question 2**
+```{r}
+tidy_who<-who %>% select(-c(iso2,iso3)) %>% pivot_longer(cols=!country:year, names_to=c("Case", "Type", "Sex", "Age"), values_to= "Counts", names_sep=c(3,6,8)) %>% separate(Type, into=c("rem","Type"), sep=1) %>% separate(Sex, into=c("rem","Sex"), sep=1) %>% select(-(rem))
+tidy_who
+```
+> Two things that we would ideally want to fix include adding an r to the el value of the Type column to make it rel as intended and adding a dash between the combined age values in Age to indicate that they are a range.
+
+***
+### **Question 3**
+```{r}
+who_group <- tidy_who %>% group_by(year, Age) %>% summarize(Counts=sum(Counts,na.rm=TRUE))
+
+ggplot(who_group)+geom_smooth(aes(x=year, y=Counts, fill=Age, color=Age),se=FALSE)+labs(x="Year", y="Number of Cases", title="Tuberculosis Cases for All Age Groups Have Been Increasing Since 1990", subtitle="Trendline indicating the change in tuberculosis cases overtime for each age group", caption="Source: tidyvers::who")
+```
+
+***
+### **Question 4**
+```{r}
+
+totalcandy<-candy %>% pivot_longer(cols=chocolate:pluribus, names_to="Type", values_to= "Count") 
+
+plot_candy <- totalcandy %>% group_by(Type) %>% summarize(Count=sum(Count))
+
+ggplot(plot_candy)+geom_bar(aes(x=Count, y=fct_reorder(Type,Count)),stat="identity")
+```
+
+***
+### **Question 5**
+```{r,include=FALSE}
+cars2
+mtcars
+```
+```{r}
+all_equal(cars,mtcars)
+```
+
+>They are not the same because, based on what the all_equal function is returning, there are 7 rows in the mtcars data frame that aren't in the cars.csv tibble that was imported and that there is one row in the cars.csv tibble that isn't in the mtcars data frame.

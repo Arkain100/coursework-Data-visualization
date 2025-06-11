@@ -1,0 +1,54 @@
+---
+title: "**Data Visualization Markdown Assignment 2**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+### **Question 1.**
+```{r}
+dim(iris)
+tail(iris, n=15)
+```
+>The species value of the last observation is virginica.
+
+***
+### **Question 2.**
+```{r}
+ggplot(data=iris)+geom_point(mapping=aes(x=Sepal.Width, y=Sepal.Length, color=Species, shape=Species))
+```
+
+***
+### **Question 3.**
+```{r}
+ggplot(data=iris)+geom_point(mapping=aes(x=Sepal.Length, y=Sepal.Width, color=Species, shape=Species), size=8)+labs(x= "Iris Sepal Length (inches)", y = "Iris Sepal Width (inches)")
+```
+
+***
+### **Question 4.**
+```{r}
+ggplot(data=iris)+geom_point(mapping=aes(x=Petal.Width, y=Petal.Length, alpha=Sepal.Width), color="purple")+facet_wrap(~Species, nrow=2)
+```
+```{r, include=FALSE}
+library(patchwork)
+```
+
+***
+### **Question 5.**
+```{r}
+sp.length<-ggplot(data=iris)+geom_point(mapping=aes(x=Sepal.Length, y=Petal.Length, color=Species))
+
+sp.width<-ggplot(data=iris)+geom_point(mapping=aes(x=Sepal.Length, y=Petal.Width, color=Species))
+
+ss.plot<-ggplot(data=iris)+geom_point(mapping=aes(x=Sepal.Length, y=Sepal.Width, color=Species))
+(sp.length+sp.width)/ss.plot
+```
+
+***
+### **Question 6.**
+> One thing that could be improved is the addition of trendlines that show that relation of Sepal length and width to te respective petal length and width. Another could also be swapping the x-axes of the first two plots to make more coherent groupings (e.g. length of sepal with length of petals) that would make more sense for observers to understand and to compare. Likewise, the plots could be improved by just setting the plots side by side instead of having the third stretched beneath them, which makes comparison between the plots difficult due to the stretching of the x-axis despite them being the same length

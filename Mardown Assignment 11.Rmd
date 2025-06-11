@@ -1,0 +1,67 @@
+---
+title: "Markdown Assignment 11"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(Lahman)
+```
+
+### **Question 1**
+```{r,echo=FALSE}
+tibbat<-as_tibble(Batting)
+tibpit<-as_tibble(Pitching)
+tibfie<-as_tibble(Fielding)
+tibsal<-as_tibble(Salaries)
+```
+```{r}
+tibbat %>% count(playerID, yearID,stint) %>% filter(n>1)
+tibpit %>% count(playerID, yearID,stint) %>% filter(n>1)
+tibfie %>% count(playerID, yearID, stint, POS) %>% filter(n>1)
+tibsal %>% count(playerID, yearID, teamID) %>% filter(n>1)
+```
+
+
+***
+### **Question 2**
+```{r}
+batsalr <- tibbat %>% right_join(tibsal)
+batsall <- tibbat %>% left_join(tibsal)
+
+ggplot(batsalr) + geom_point(aes(x=salary, y=H))
+
+ggplot(batsall) + geom_point(aes(x=salary, y=H))
+```
+
+> Their are no visible differnces between the plots. However, the warning messages each plot gives indicats that their are more rows being dropped in the left join because their are fewer data points in the salary tibble than the batting tibble it is being joined to, resulting in the observations that aren't included in the salary tibble to be na values that have to be dropped for they can't be plotted on the scatter pltot. (the right join just drops most of the excess values from batting for they have no where to be added to, with the ones being dropped likely being ones where the salary data had an observation that the batting data couldn't fill)
+
+***
+### **Question 3**
+```{r}
+fisall <- tibfie %>% right_join(tibsal)
+
+fisall <- fisall %>% group_by(yearID, POS) %>% summarize(salary=mean(salary,na.rm=TRUE))
+fisall <- drop_na(fisall)
+
+ggplot(fisall) + geom_line(aes(x=yearID, y=salary, color=POS)) + labs(x="Year",y="Average Salary")
+```
+
+> One observation that can be made about the extent at which a position affects a baseball player's salary is, as of the year 2005, first basemen have had the highest salary on average out of all field positions leading it to make roughly 3 million more on average than the average short stop field position in 2016.
+
+***
+### **Question 4**
+```{r}
+mixbat <- tibpit %>% inner_join(tibfie, join_by(playerID, yearID, stint, G<G))
+
+sumbat<-mixbat %>% count(playerID)
+summary(sumbat)
+
+mixbat2<-mixbat %>% filter(ERA<30)
+ggplot(mixbat2) + geom_hex(aes(x=ERA, y=SO),bins=40)
+```
+
+> There are 823 players that match the criteria.
+> There does not appear to be a correlation between the number of earned runs and the number of strike-outs. Likewise, most of the data shows that most pitchers have zero SOs and zero ERAs. 

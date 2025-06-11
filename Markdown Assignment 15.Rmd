@@ -1,0 +1,68 @@
+---
+title: "Markdown Assignment 15"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+library(dplyr)
+tenday<-read_csv("tenday.csv")
+yearsched<-read_csv("yearlyschedule.csv")
+```
+
+### **Question 1**
+```{r}
+tenday
+yearsched
+```
+
+***
+### **Question 2**
+```{r}
+monthord <- c("Jan","Feb","Mar","Apr","May", "Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+
+
+finyear <- yearsched %>% complete(month=c("Jan","Mar", "May","Jul","Aug","Oct","Dec"),day=1:31) %>% complete(month=c("Apr","Jun","Sep","Nov"), day=1:30)%>% complete(month="Feb", day=1:28) %>% mutate(month=factor(month,monthord)) %>% arrange(month)
+
+finyear
+```
+
+***
+### **Question 3**
+```{r}
+finten<-tenday %>% mutate(employee3=coalesce(employee3,"Mirabel"))
+finten
+```
+
+***
+### **Question 4**
+```{r}
+finyear<-finyear %>% mutate(daynum=yday(make_date(2025,month,day))%%10)
+finyear
+```
+
+***
+### **Question 5**
+```{r}
+nework<- finyear %>% left_join(finten) %>% select(-(daynum)) %>% pivot_longer(c("employee1","employee2","employee3"), names_to="employee_number",values_to="employee_name") %>% separate_wider_regex(employee_number, patterns=c("employee",employee_count="[1-3]"))
+nework
+```
+> Originally it is not tidy because we would want employee to be one variable. (also daynum would be extrenuous due to it being a value we don't want)
+
+***
+### **Question 6**
+```{r}
+nework %>% filter(employee_name=="Kazim") %>% mutate(days_of_work=make_date(2025,month,day)) %>% select(employee_name,days_of_work)
+```
+
+***
+### **Question 7**
+```{r}
+worknum<-nework %>% group_by(employee_name) %>% summarize(work_days=n())
+
+ggplot(worknum)+geom_bar(aes(x=employee_name, y=work_days, fill=employee_name), stat="identity") + labs(title="Number of Workdays Per Employee", x="Employee Name", y="Number of Workdays")+coord_cartesian(ylim=c(215,220))
+```
+
+> There is not an imbalance between the number of shifts being offered to each employee.

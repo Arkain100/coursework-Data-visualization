@@ -1,0 +1,67 @@
+---
+title: "**Markdown Assignment 12**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r, echo=FALSE,include=FALSE}
+library(tidyverse)
+princess<-read_csv("princess.csv")
+library(readr)
+library(babynames)
+```
+
+### **Question 1**
+```{r}
+textor<-readLines("Data_vis_text_first.txt")
+product=""
+for (a in seq(1,58101,by=1700)) {
+  product<-str_c(product,str_sub(textor,a,a))
+}
+product
+```
+
+***
+### **Question 2**
+```{r}
+tidyprincess <- princess %>% separate_wider_delim(pps, delim="-", names=c("Princess", "Prince", "Pets"), too_few="align_start") %>% separate_wider_delim(Pets, delim="^", names=c("Pet1", "Pet2", "Pet3"), too_few="align_start") 
+tidyprincess
+
+ggplot(tidyprincess)+geom_bar(aes(y=fct_reorder(Princess, age), x=age), stat="identity")+coord_cartesian(xlim=c(12,20))+geom_text(aes(x=age, y=Princess, label=age), hjust=-0.2, color="red")
+```
+
+***
+### **Question 3**
+```{r}
+princess %>% separate_wider_delim(pps, delim="-", names=c("Princess", "Prince", "Sidekick"), too_few="align_start") %>% separate_longer_delim(Sidekick, delim="^") %>% separate(age, into=c("tens_place","ones_place"), sep=1)
+
+```
+
+***
+### **Question 4**
+```{r}
+lennames<-babynames %>% mutate(len = str_length(name)) %>% group_by(len) %>% summarize(n=sum(n))
+
+ggplot(lennames)+geom_bar(aes(x=len, y=n), stat="identity")+labs(x="Name Length",y="Number of Names")
+```
+
+***
+### **Question 5**
+```{r}
+letternames<-babynames %>% mutate(letter=str_sub(name,1,1)) %>% mutate(len = str_length(name)) %>% group_by(letter,len) %>% summarize(n=sum(n))
+
+ggplot(letternames)+geom_tile(aes(x=len,y=letter,fill=n))
+```
+
+> Observations that can be made regarding the name lengths and the beginning letters of the names are that most names tend to have most the most names around 5-6 letters in length and that names starting with J tend to have the most names between 4 and 6 letters in length.
+
+***
+### **Question 6**
+```{r}
+newname<-babynames %>% mutate(start_letter=str_sub(name,1,1),end_letter=str_sub(name,-1,-1)) %>% mutate(len = str_length(name)) %>% filter(len==4,start_letter=="R", end_letter=="y")
+
+ggplot(newname)+geom_bar(aes(y=fct_reorder(name,n),x=n),stat="identity")
+```
+
+> Possibly Rory or Rony would be good suggestions because they are both decently common names that start with R and end with Y with 4 letters in length but low enough that they aren't the most common names.

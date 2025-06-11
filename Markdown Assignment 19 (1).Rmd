@@ -1,0 +1,92 @@
+---
+title: "Markdown Assignment 19: Dashboards"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    orientation: columns
+    vertical_layout: fill
+---
+
+# Nuclear Sites
+
+```{r setup,echo=FALSE, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(gapminder)
+library(plotly)
+library(collapsibleTree)
+library(gganimate)
+library(leaflet)
+library(gifski)
+library(DT)
+nuclear<-read_csv("nuclear.csv")
+kindle<-read_csv("kindle_data.csv")
+```
+
+***
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Question 2: Nuclear Site Ratings and Locations
+
+```{r}
+nuclear2 <- nuclear %>% mutate(colors=case_when(site.rating==0 ~ "orange",site.rating==1 ~"green", site.rating==2 ~ "red", site.rating==3 ~ "black"))
+
+nucplot <- leaflet(nuclear2) %>% addTiles() %>% addCircleMarkers(lng=~longitude, lat=~latitude, popup= ~site.city , color=~colors, fillOpacity = 1) %>% setView(-100,33,zoom=4)
+
+nucplot
+```
+
+***
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Question 3 and 4: Number of Sites Per Rating
+
+```{r}
+nucgroup <- nuclear2 %>% group_by(site.rating) %>% summarize(number=n())
+
+rateplot <- ggplot(nucgroup)+geom_bar(aes(x=site.rating, y=number), stat="identity")+labs(x=NULL, y=NULL)+scale_x_discrete(labels=NULL)
+
+ggplotly(rateplot)
+```
+
+***
+### Sites by State and City
+
+```{r}
+collapsibleTree(nuclear2, hierarchy = c("site.state", "site.city","site.name"), tooltip=TRUE)
+```
+
+# Kindle Books
+
+***
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Question 5: Books by Rating
+
+```{r}
+sordle<-kindle %>% arrange(desc(stars))
+datatable(sordle)
+```
+
+***
+Column {.tabset .tabset data-width=500}
+-----------------------------------------------------------------------
+
+### Question 6: Top 5 Most Popular Authors
+
+```{r}
+authors<-kindle %>% group_by(author) %>% summarize(star=mean(stars, na.rm=TRUE)) %>% arrange(desc(star)) %>% head(5)
+
+ggplot(authors)+geom_bar(aes(y=author, x=star), stat="identity")+labs(y="Author")
+```
+
+### Question 6: Top 5 Most Popular Sellers
+```{r}
+seller<-kindle %>% group_by(soldBy) %>% summarize(stars=mean(stars,na.rm=TRUE)) %>% arrange(desc(stars)) %>% head(5)
+
+ggplot(seller)+geom_bar(aes(y=fct_reorder(soldBy,stars), x=stars), stat="identity")+labs(y="Seller")
+```
+

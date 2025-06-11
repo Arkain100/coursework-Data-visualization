@@ -1,0 +1,62 @@
+---
+title: "Markdown Assignment 21"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(rvest)
+library(xml2)
+library(tidyverse)
+website1<-read_html("https://rvest.tidyverse.org/articles/starwars.html")
+```
+
+### **Question 2**
+```{r}
+L<-html_elements(website1,"section")
+
+starMovies <- tibble(title=L %>% html_elements("h2") %>%html_text2(), released= L %>% html_element("p")%>% html_text2(), director=L %>% html_element(".director")%>% html_text2(), intro=L %>% html_element(".crawl")%>% html_text2())
+
+starMovies <- starMovies %>% mutate(released=str_remove(released, "Released: ")) %>% mutate(released=as_date(released))
+
+starMovies
+
+```
+
+***
+### **Question 3**
+```{r}
+introLength <- starMovies %>% mutate(ilength=str_length(intro))
+
+introLength
+
+ggplot(introLength)+geom_line(aes(x=released,y=ilength))+geom_point(aes(x=released,y=ilength,color=title))+theme(legend.position="NULL")+geom_text(mapping=aes(x=released,y=ilength+5, label=title, color=title),size=3,stat="identity")+labs(x="Release Date",y="Intro Character Length", title="The Length of Star Wars Intros Over Time")+coord_cartesian(xlim=c(as_date("1976-01-01"),as_date("2020-01-01")))
+```
+
+***
+### **Question 4**
+```{r,echo=FALSE,include=FALSE}
+website2<-read_html("https://en.wikipedia.org/wiki/The_Tortured_Poets_Department")
+```
+
+```{r}
+TS<-html_element(website2,".tracklist")
+
+wikitable<-html_table(TS)
+
+newtable<-wikitable %>% head(16) %>% mutate(No= as.numeric(str_remove(`No.`,'\\.'))) %>% mutate(Title=str_remove_all(Title,'\\"')) %>% mutate(Writer=str_remove_all(`Writer(s)`,'Taylor '))%>% mutate(Writer=str_remove_all(Writer,'Jack '))%>% mutate(Writer=str_remove_all(Writer,'Austin '))%>% mutate(Writer=str_remove_all(Writer,' ')) %>% separate_wider_regex(Writer, patterns=c(name1="[A-Z][a-z]+", name2="[A-Z][a-z]+",name3="[A-Z][a-z]+"), too_few = "align_start") %>% pivot_longer(c("name1","name2","name3"), names_to=NULL, values_to="Writers") %>% drop_na(Writers)%>% mutate(Producer=str_remove_all(`Producer(s)`,' '))%>% separate_wider_regex(Producer, patterns=c(name1="[A-Z][a-z]+", name2="[A-Z][a-z]+",name3="[A-Z][a-z]+", name4="[A-Z][a-z]+"), too_few = "align_start") %>% pivot_longer(c("name1","name2","name3","name4"), names_to=NULL, values_to="Producers") %>% drop_na(Producers)%>% mutate(Seconds=as.numeric(str_sub(Length,1,1))*60+as.numeric(str_sub(Length,3,4)))%>% select(No:Seconds,Title)
+newtable
+
+```
+
+
+***
+### **Question 5**
+```{r}
+newtable2<-newtable %>% filter(Writers=="Dessner") %>% group_by(Title,Writers) %>% summarize(Seconds=mean(Seconds))
+newtable2
+
+ggplot(newtable2) + geom_bar(aes(y=fct_reorder(Title, Seconds),x=Seconds), stat="identity")+labs(x="Time (seconds)", y="Song Title", title="Length of Songs Written by Aaron Dessner")
+```
+

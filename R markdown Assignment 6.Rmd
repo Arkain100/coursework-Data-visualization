@@ -1,0 +1,59 @@
+---
+title: "**R Markdown Assignment 6**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+### ***Question 1.***
+```{r}
+educationlevel<-c("primary", "undergraduate", "graduate", "secondary", "primary")
+list1<-c("earlychildhood", "primary", "secondary", "undergraduate", "graduate")
+edu.fact<-factor(educationlevel,levels=list1)
+sort(edu.fact)
+```
+
+***
+### ***Question 2.***
+```{r}
+schoolheight<-read_csv("school-height.csv")
+
+schoolheight1<-mutate(schoolheight, edlevel = factor(case_when(ed==0 ~ "earlychildhood", (ed>=1 & ed<=6) ~ "primary", (ed>=7 & ed<=12) ~ "secondary", (ed>=13 & ed<=16) ~ "undergraduate", (ed>=17 & ed<=22) ~ "graduate"), levels=list1))
+
+tail(schoolheight1)
+```
+
+***
+### ***Question 3.***
+```{r}
+edplot<-ggplot(schoolheight1)+geom_bar(aes(x=ed, fill=race), position="dodge")
+edplot
+
+edlvplt<-ggplot(schoolheight1)+geom_bar(aes(x=edlevel, fill=race), position="dodge")
+edlvplt
+
+```
+
+> The bottom plot is more desired when making observations because their are less individual data categories to consider that make the grouped data categories easier to see and determine where the students are in terms of their grade level. We made the education level factor a column to make it easier and more effiecent for R to sort by the way in which we wanted it to sort the data.
+
+***
+### ***Question 4.***
+```{r}
+hised<-filter(schoolheight1, race=="hispanic")
+ggplot(hised)+geom_bar(aes(x=edlevel, fill=sex), color="navy")+facet_wrap(~sex)
+```
+
+> The earlychildhood column did not appear because their are no students who are hispanic and in earlychildhood education.
+
+***
+### ***Question 5.***
+```{r}
+edgroup<-mutate(schoolheight1, edlevel=fct_recode(edlevel,"PreK-6th" = "earlychildhood", "PreK-6th" = "primary", "7th-12th" = "secondary", "Higher Education" = "undergraduate", "Higher Education" = "graduate")) %>% group_by(edlevel) %>% summarize(height = mean(height, na.rm=TRUE))
+
+ggplot(edgroup)+geom_point(aes(x=edlevel,y=height))+labs(x="Education Level",y="Average Height (in.)")
+```
+```

@@ -1,0 +1,61 @@
+---
+title: "**R Markdown Assignment 4**"
+author: "**John Jenkins**"
+date: "Fall 2024"
+output: html_document
+---
+```{r,include=FALSE}
+library(tidyverse)
+```
+
+### **Question 1.**
+```{r}
+star_ibble<-as_tibble(filter(starwars, homeworld=="Tatooine", height>=100))
+star_ibble
+```
+
+***
+### **Question 2.**
+```{r}
+star_ibble<-select(star_ibble, -(homeworld) & -(films:starships)) %>% arrange(mass)
+star_ibble
+```
+
+> Shmi Skywalker and Cliegg Lars were moved to the bottom of the list because they both have a NA/null value for their mass so they can't be given an order in the list.
+
+***
+### **Question 3.**
+```{r}
+star_set<-group_by(starwars, species) %>% summarize(avg_height=mean(height, na.rm=TRUE), avg_mass=mean(mass,na.rm=TRUE)) 
+ggplot(data=star_set)+geom_bar(aes(x=species, y=avg_height), stat="identity")
+```
+
+> One observation I can get from this plot is that most species average around 200 inches in height.
+
+***
+### **Question 4.**
+```{r}
+star_data<-mutate(starwars, mix = height+mass+birth_year) %>% select(name, mix, everything())
+star_data
+```
+
+***
+### **Question 5.**
+```{r, include=FALSE}
+library(nycflights13)
+library(patchwork)
+```
+```{r}
+small_flight<-select(flights, arr_delay,dep_delay,distance) %>% filter(dep_delay>=0 | arr_delay>=0) %>% mutate(haul = case_when(distance<200 ~ "short", distance>=200 & distance<1000 ~ "medium", distance>=1000 ~ "long")) %>% group_by(haul) %>% summarize(avg_arr_delay = mean(arr_delay, na.rm=TRUE), avg_dep_delay=mean(dep_delay, na.rm=TRUE))
+
+small_flight
+
+arr.bar<-ggplot(small_flight)+geom_bar(aes(x=haul,y=avg_arr_delay), stat="identity")
+
+dep.bar<-ggplot(small_flight)+geom_bar(aes(x=haul,y=avg_dep_delay), stat="identity")
+
+arr.bar+dep.bar
+```
+
+> I can conclude that both the average arrival and departure delay are roughly the same for medium and short hauls, indicating that the flights typically arrive in the expected timeframe. Likewise, an exception to the previous conclusion, it can be concluded that the average arrival delay is less than the average departure delay, indicating that flights that are delayed likely fly faster to make up for lost time.
+

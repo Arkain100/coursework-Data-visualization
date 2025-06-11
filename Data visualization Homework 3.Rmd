@@ -1,0 +1,62 @@
+---
+title: "**R Markdown Assignment 3**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+```
+
+### **Question 1.**
+```{r}
+ggplot(data=iris)+geom_point(mapping=aes(x=Petal.Length, y=Petal.Width, color=Species))+geom_smooth(aes(Petal.Length,Petal.Width),linetype="dotdash",se=FALSE)
+```
+
+***
+### **Question 2.**
+```{r}
+ggplot(data=iris)+geom_point(mapping=aes(x=Petal.Length, y=Petal.Width, color=Species))+geom_smooth(aes(Petal.Length,Petal.Width,color = Species))
+```
+
+***
+### **Question 3.**
+```{r}
+ggplot(data=iris)+geom_bar(aes(x=Sepal.Width, fill=Species),color='black')
+```
+
+***
+### **Question 4.**
+```{r}
+ggplot(data=iris)+geom_bar(aes(x=Sepal.Width, fill=Species),color='black')+geom_vline(aes(xintercept=mean(Sepal.Width)),color='purple', linewidth=1)
+```
+
+> This is roughly were I expected the average to be due to the large concentration of values along the graphs center and the largest value of 3.0. Likewise, I expected it to be roughly towards the right of the graph due to the larger range of values on the right that have a larger difference from 3.0 than the lowest value towards the left of the graph.
+
+***
+### **Question 5.**
+```{r}
+ggplot(data=diamonds)+geom_bar(aes(x=color,fill=cut),position="dodge")
+```
+
+***
+### **Question 6.**
+```{r}
+ggplot(data=diamonds)+geom_bar(aes(x=color, fill=cut),position="fill")
+```
+
+> This plot represents the percentage of each type of cut for each diamond color. A new label that would fit the y-axis in exchange for count could be percentage, which would indicate that each bar color represents the percentage of diamond colors that have the coressponding cut.
+
+***
+### **Question 7.**
+```{r}
+library(ggalt)
+gss_cat2 <- gss_cat %>% group_by(relig) %>% filter(tvhours>5) %>% summarize(tv_min= min(tvhours,na.rm=TRUE), tv_max=max(tvhours,na.rm=TRUE))
+
+ggplot(gss_cat2,aes(x=tv_min,xend=tv_max,y=relig))+geom_dumbbell()+labs(x="TV hour
+s",y="Religion")
+```
+
+> I think the aesthetic inputs x and xend are the begining and ending TV hour values for each of the religion categories, meaning they represent the minimum and maximum hours of TV (possibly an average) associated with each religion.
+

@@ -1,0 +1,61 @@
+---
+title: "Markdown Assignment 14"
+author: "John Jenkins"
+date: "Fall 2024"
+output: html_document
+---
+
+```{r setup, echo=FALSE,include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(nycflights13)
+```
+
+### **Question 1**
+```{r}
+timeflights <- flights %>% filter(dep_time>0 & arr_time>0) %>% mutate(dep_time=make_datetime(year, month, day, dep_time%/%100, dep_time%%100), arr_time=make_datetime(year, month, day, arr_time%/%100, arr_time%%100), sched_dep_time=make_datetime(year, month, day, sched_dep_time%/%100, sched_dep_time%%100), sched_arr_time=make_datetime(year, month, day, sched_arr_time%/%100, sched_arr_time%%100)) %>% select(dep_time, arr_time, sched_dep_time, sched_arr_time)
+
+timeflights
+```
+***
+### **Question 2**
+```{r}
+ggplot(timeflights)+geom_histogram(aes(dep_time), binwidth=86400)+labs(caption=today())
+```
+
+> I notice that that the tick marks along the x-axis are dates of month and year instead of numbers and that they are in increaments of 3 months.
+
+***
+### **Question 3**
+```{r}
+ggplot(timeflights)+geom_freqpoly(aes(dep_time),binwidth=86400)
+```
+
+> The difference between this plot and the plot in question 2 is that this plot shows the variation in the data by creating a line of the number of flights for each day. This plot would be the most preferred because it's easier to see the variation.
+
+***
+### **Question 4**
+```{r}
+newtimeflights <- timeflights %>% mutate(arr_time=case_when(arr_time<dep_time ~ arr_time+days(1), arr_time>dep_time~arr_time), sched_arr_time=case_when(sched_arr_time<sched_dep_time ~ sched_arr_time+days(1),sched_arr_time>sched_dep_time~sched_arr_time))
+
+newtimeflights
+```
+
+***
+### **Question 5**
+```{r}
+mayflights <- newtimeflights %>% filter(arr_time>ymd("2013-03-11"), arr_time<ymd("2013-03-12"), sched_arr_time>ymd("2013-03-11"), sched_arr_time<ymd("2013-03-12"))
+
+ggplot(mayflights)+geom_freqpoly(aes(x=arr_time),binwidth=1800, color="blue")+geom_freqpoly(aes(x=sched_arr_time),binwidth=1800,color="red")+labs(title= "Opening Day of Spring Break 2013", x="Schedule (red) vs Actual (blue) Departure Time", y="Number of flights every 30 minutes")
+```
+
+***
+### **Question 6**
+```{r}
+final<-parse_date_time("12/12/2024 4:00 PM", '%m/%d%Y %I:%M %p')
+### 11am CDT is 4pm UTC
+final_time<-today() %--% final
+minutes_till_final<- final_time/minutes(1)
+minutes_till_final
+```
+

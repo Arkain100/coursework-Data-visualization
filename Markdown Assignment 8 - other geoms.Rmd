@@ -1,0 +1,61 @@
+---
+title: "**Markdown Assignment 8 - Other Geoms**"
+author: "**John Jenkins**"
+date: "**Fall 2024**"
+output: html_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+library(tidyverse)
+```
+
+### **Question 1**
+```{r,echo=FALSE}
+library(gapminder)
+```
+```{r}
+gaps<-ggplot(gapminder,aes(x=lifeExp,y=gdpPercap))
+gaps+geom_hex(bins=30)+scale_y_log10()
+```
+
+> Looking at the data under a logarithmic scale tells more and slightly different information than under the standard scale because it shows the maginitude of differences between the values rather than the actual values that can make the plot difficult to understand do to the large range of values causing the bins of smaller values to be highly condensed.
+
+***
+### **Question 2**
+```{r}
+oceanap<-filter(gapminder, continent=="Oceania")
+ggplot(oceanap)+geom_boxplot(aes(country, lifeExp, fill=country), notch=TRUE)
+```
+
+> We cannot be at least 95% confident that the average life expectancy is different between Australia and New Zealand because the notches overlap.
+
+***
+### **Question 3**
+```{r}
+causedeath<-read_csv("CauseDeath.csv")
+deathplt<-ggplot(causedeath)+geom_line(aes(x=Year,y=DeathRate, color=Cause))
+deathplt
+```
+```{r}
+deathplt+coord_polar()
+```
+
+> I can gather that the Cancer cause's death rate has increased over time as from its start in 1900, but it is more difficult to see on the coordinate system because the distortion makes the increase less noticable and makes the line look more like a circle.
+
+***
+### **Question 4**
+```{r}
+decause<-causedeath %>% mutate(decade=(Year%/%10)*10) %>% group_by(decade,Cause) %>% summarize(DeathRate=mean(DeathRate))
+
+ggplot(decause)+geom_tile(aes(x=decade,y=Cause,fill=DeathRate))+scale_fill_gradient(low="lightgreen", high="darkgreen")
+```
+
+> An observation that I can make from this plot is that the Heart Disease cause of death had the highest death rate in the decade 1950 and had the highest death rate among the other causes.
+
+***
+### **Question 5**
+```{r}
+ggplot(diamonds)+geom_bar(aes(x="",fill=cut))+coord_polar(theta="y")+theme_void()
+```
+
+> I think the programmers of R have not cared to make pie charts easier to graph in R because they tend to be poor visualization due to the fact that they don't utilize many of the key visualizaiton points highlighted in "How Humans See Data" and due to the main point that Pie Charts use being color hue, which is the lowest variable in which people differentiate between data.
